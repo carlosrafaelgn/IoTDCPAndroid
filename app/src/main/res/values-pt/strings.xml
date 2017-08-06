@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Controle IoT</string>
+    <string name="oops">Oops&#8230;</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+    <string name="close">Fechar</string>
+    <string name="understood">Entendido</string>
+    <string name="yes">Sim</string>
+    <string name="no">Não</string>
+    <string name="more">Mais</string>
+    <string name="refresh">Atualizar</string>
+    <string name="device_responded">%1$s respondeu: %2$s</string>
+    <string name="no_network_connection">Sem conexão com a rede :(</string>
+    <string name="network_error">Ocorreu um erro de rede :(</string>
+    <string name="timeout">A resposta do dispositivo %s ainda não chegou</string>
+    <string name="unknown_error">Ocorreu um erro desconhecido</string>
+    <string name="device_error">Ocorreu um erro interno</string>
+    <string name="unknown_client">A conexão com o dispositivo %s foi perdida (já estamos tentando uma nova conexão)</string>
+    <string name="unsupported_message">Sem suporte para a mensagem</string>
+    <string name="payload_too_large">O conteúdo da mensagem era muito grande</string>
+    <string name="invalid_payload">O conteúdo da mensagem era inválido</string>
+    <string name="eop_not_found">Mensagem terminada incorretamente</string>
+    <string name="wrong_password">Senha inválida</string>
+    <string name="password_read_only">A senha é fixa e não pode ser alterada</string>
+    <string name="cannot_change_password_now">Não é possível alterar a senha nesse momento</string>
+    <string name="invalid_interface">Interface inválida</string>
+    <string name="invalid_interface_command">Comando inválido</string>
+    <string name="invalid_interface_property">Propriedade inválida</string>
+    <string name="interface_property_read_only">A propriedade é somente para leitura</string>
+    <string name="interface_property_write_only">A propriedade é somente para escrita</string>
+    <string name="invalid_interface_property_value">O valor da propriedade é inválido</string>
+    <string name="try_again_later">Tente novamente em alguns instantes</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="onoff">On / Off</string>
+    <string name="change">Alterar</string>
+</resources>

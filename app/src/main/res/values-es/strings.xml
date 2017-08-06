@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Control IoT</string>
+    <string name="oops">Oops&#8230;</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+    <string name="close">Cerrar</string>
+    <string name="understood">Entendido</string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+    <string name="more">Más</string>
+    <string name="refresh">Actualizar</string>
+    <string name="device_responded">%1$s respondió: %2$s</string>
+    <string name="no_network_connection">No hay conexion de red :(</string>
+    <string name="network_error">Se ha producido un error de red :(</string>
+    <string name="timeout">La respuesta del dispositivo %s aún no ha llegado</string>
+    <string name="unknown_error">Ha ocurrido un error desconocido</string>
+    <string name="device_error">Se ha producido un error interno</string>
+    <string name="unknown_client">Se ha perdido la conexión con el dispositivo %s (ya estamos intentando establecer una nueva conexión)</string>
+    <string name="unsupported_message">Mensaje no compatible</string>
+    <string name="payload_too_large">El contenido del mensaje era demasiado grande</string>
+    <string name="invalid_payload">El contenido del mensaje no es válido</string>
+    <string name="eop_not_found">El mensaje no se terminó correctamente</string>
+    <string name="wrong_password">Contraseña incorrecta</string>
+    <string name="password_read_only">La contraseña es fija y no se puede cambiar</string>
+    <string name="cannot_change_password_now">No es posible cambiar la contraseña ahora</string>
+    <string name="invalid_interface">Interfaz inválida</string>
+    <string name="invalid_interface_command">Comando inválido</string>
+    <string name="invalid_interface_property">Propiedad inválida</string>
+    <string name="interface_property_read_only">El valor de la propiedad es sólo para leer</string>
+    <string name="interface_property_write_only">El valor de la propiedad es sólo para escribir</string>
+    <string name="invalid_interface_property_value">Valor de propiedad incorrecto</string>
+    <string name="try_again_later">Prueba otra vez en unos instantes</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="onoff">On / Off</string>
+    <string name="change">Cambiar</string>
+</resources>

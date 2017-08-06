@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IoT Control</string>
+    <string name="oops">Oops&#8230;</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="understood">Understood</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="more">More</string>
+    <string name="refresh">Refresh</string>
+    <string name="device_responded">%1$s responded: %2$s</string>
+    <string name="no_network_connection">No network connection :(</string>
+    <string name="network_error">A network error has happened :(</string>
+    <string name="timeout">The response of the device %s has not arrived yet</string>
+    <string name="unknown_error">An unknown error has happened</string>
+    <string name="device_error">An internal error has happened</string>
+    <string name="unknown_client">The connection to the device %s was lost (we are already trying to establish a new connection)</string>
+    <string name="unsupported_message">Unsupported message</string>
+    <string name="payload_too_large">The message\'s content was too large</string>
+    <string name="invalid_payload">The message\'s content was invalid</string>
+    <string name="eop_not_found">The message was not properly terminated</string>
+    <string name="wrong_password">Wrong password</string>
+    <string name="password_read_only">The password is fixed and cannot be changed</string>
+    <string name="cannot_change_password_now">It is not possible to change the password right now</string>
+    <string name="invalid_interface">Invalid interface</string>
+    <string name="invalid_interface_command">Invalid command</string>
+    <string name="invalid_interface_property">Invalid property</string>
+    <string name="interface_property_read_only">The property\'s value is read-only</string>
+    <string name="interface_property_write_only">The property\'s value is write-only</string>
+    <string name="invalid_interface_property_value">Invalid property\'s value</string>
+    <string name="try_again_later">Try again in a few moments</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="onoff">On / Off</string>
+    <string name="change">Change</string>
+    <string name="title_activity_main2">Main2Activity</string>
+</resources>

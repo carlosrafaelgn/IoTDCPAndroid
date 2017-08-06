@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- https://www.google.com/design/spec/style/color.html#color-color-palette -->
+    <color name="colorTransparent">#00000000</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorDivider">#A0A0A0</color>
+    <color name="colorBgBold">#C0C0C0</color>
+    <color name="colorBgDark">#E0E0E0</color>
+    <color name="colorBgLight">#FFFFFF</color>
+    <color name="colorBgText">#000000</color>
+    <color name="colorBgTextMedium">#505050</color>
+    <color name="colorBgTextSecondary">#3F51B5</color>
+</resources>

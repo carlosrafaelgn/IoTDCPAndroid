@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="@dimen/card_margin"
+              android:background="?android:attr/selectableItemBackground"
+              android:baselineAligned="false"
+              android:clickable="true"
+              android:orientation="vertical"
+              android:padding="@dimen/card_padding">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/txtTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/panelOnOff"
+            android:layout_toStartOf="@+id/panelOnOff"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+        <LinearLayout
+            android:id="@+id/panelOnOff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/card_margin"
+            android:layout_marginStart="@dimen/card_margin"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnOn"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/on"/>
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnOnOn"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/on"
+                android:visibility="gone"/>
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnOff"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/card_margin"
+                android:layout_marginStart="@dimen/card_margin"
+                android:text="@string/off"/>
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnOffOff"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/card_margin"
+                android:layout_marginStart="@dimen/card_margin"
+                android:text="@string/off"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>
