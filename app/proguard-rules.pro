@@ -15,3 +15,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keepattributes InnerClasses, EnclosingMethod
+-optimizationpasses 9
+-useuniqueclassmembernames
+-allowaccessmodification
+-repackageclasses ''
