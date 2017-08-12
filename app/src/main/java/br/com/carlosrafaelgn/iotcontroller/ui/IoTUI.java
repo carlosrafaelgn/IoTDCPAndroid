@@ -203,17 +203,25 @@ public final class IoTUI {
 		((AppCompatTextView)panel.findViewById(R.id.txtTitleColor)).setText(property.name);
 
 		final AppCompatButton btn = ((AppCompatButton)panel.findViewById(R.id.btnChange));
-		btn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ColorPickerView.showDialog(activity, property.getValueRGB(), null, false, new ColorPickerView.OnColorPickerViewListener() {
-					@Override
-					public void onColorPicked(ColorPickerView colorPickerView, View parentView, int color) {
-						property.setValueRGB(color);
-					}
-				});
-			}
-		});
+		if (property.mode == IoTProperty.ModeReadOnly) {
+			final ViewGroup.LayoutParams params = btn.getLayoutParams();
+			params.width = 0;
+			btn.setText("");
+			btn.setLayoutParams(params);
+			btn.setVisibility(View.INVISIBLE);
+		} else {
+			btn.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					ColorPickerView.showDialog(activity, property.getValueRGB(), null, false, new ColorPickerView.OnColorPickerViewListener() {
+						@Override
+						public void onColorPicked(ColorPickerView colorPickerView, View parentView, int color) {
+							property.setValueRGB(color);
+						}
+					});
+				}
+			});
+		}
 	}
 
 	private static void createViewForEnumProperty(Activity activity, LayoutInflater layoutInflater, LinearLayout parent, final IoTProperty property) {
@@ -226,31 +234,35 @@ public final class IoTUI {
 		ArrayAdapter<IoTProperty.Enum> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, property.getEnums());
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
-		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			private boolean firstTime = true;
+		if (property.mode == IoTProperty.ModeReadOnly) {
+			spinner.setEnabled(false);
+		} else {
+			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+				private boolean firstTime = true;
 
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				if (firstTime) {
-					// Spinner calls onItemSelected() just by
-					// calling setOnItemSelectedListener()
-					firstTime = false;
-					return;
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+					if (firstTime) {
+						// Spinner calls onItemSelected() just by
+						// calling setOnItemSelectedListener()
+						firstTime = false;
+						return;
+					}
+					final List<IoTProperty.Enum> enums = property.getEnums();
+					if (position < 0 || position >= enums.size())
+						return;
+					final IoTProperty.Enum e = enums.get(position);
+					// This is just to avoid setting the property again when
+					// calling spinner.setSelection()
+					if (!e.equals(property.getValueEnum()))
+						property.setValueEnum(e);
 				}
-				final List<IoTProperty.Enum> enums = property.getEnums();
-				if (position < 0 || position >= enums.size())
-					return;
-				final IoTProperty.Enum e = enums.get(position);
-				// This is just to avoid setting the property again when
-				// calling spinner.setSelection()
-				if (!e.equals(property.getValueEnum()))
-					property.setValueEnum(e);
-			}
 
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
+				@Override
+				public void onNothingSelected(AdapterView<?> parent) {
+				}
+			});
+		}
 	}
 
 	public static void updateViewOnExecute(View view, IoTDevice device, int responseCode, int interfaceIndex, int command) {

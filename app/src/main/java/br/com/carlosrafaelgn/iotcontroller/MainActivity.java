@@ -240,6 +240,10 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 		case R.id.action_refresh:
 			if (client != null)
 				client.scanDevices();
+			if (viewsByDevice != null) {
+				for (IoTDevice device : viewsByDevice.keySet())
+					device.updateAllProperties();
+			}
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -297,7 +301,6 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			handleResponse(device, responseCode);
 		} else {
 			device.updateAllProperties();
-			updateProgressBar();
 		}
 	}
 
