@@ -272,7 +272,6 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			updateProgressBar();
 			return;
 		}
-		device.setLocalPassword("Teste");
 		final View view = IoTUI.createViewForDevice(this, panelDevices, device);
 		if (view != null) {
 			viewsByDevice.put(device, view);
