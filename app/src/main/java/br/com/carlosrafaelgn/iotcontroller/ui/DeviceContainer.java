@@ -30,13 +30,18 @@
 package br.com.carlosrafaelgn.iotcontroller.ui;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 
+import br.com.carlosrafaelgn.iotcontroller.R;
 import br.com.carlosrafaelgn.iotdcp.IoTDevice;
 
 public class DeviceContainer extends LinearLayout {
 	private IoTDevice device;
+	private AppCompatTextView txtPassword;
 
 	public DeviceContainer(Context context) {
 		super(context);
@@ -50,11 +55,31 @@ public class DeviceContainer extends LinearLayout {
 		super(context, attrs, defStyleAttr);
 	}
 
-	public IoTDevice getDevice() {
-		return device;
+	void initialize(IoTDevice device, final IoTUI.PasswordClickListener listener) {
+		this.device = device;
+
+		if (!device.isPasswordProtected())
+			return;
+
+		txtPassword = (AppCompatTextView)findViewById(R.id.txtPassword);
+
+		final AppCompatButton btnPassword = (AppCompatButton)findViewById(R.id.btnPassword);
+		btnPassword.setVisibility(View.VISIBLE);
+		btnPassword.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (listener != null)
+					listener.onPasswordClick(DeviceContainer.this);
+			}
+		});
 	}
 
-	void setDevice(IoTDevice device) {
-		this.device = device;
+	public void showWrongPasswordMessage(boolean show) {
+		if (txtPassword != null)
+			txtPassword.setVisibility(show ? View.VISIBLE : View.GONE);
+	}
+
+	public IoTDevice getDevice() {
+		return device;
 	}
 }

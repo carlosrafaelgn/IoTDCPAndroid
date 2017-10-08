@@ -6,8 +6,37 @@
                                                         android:padding="@dimen/card_padding">
 
     <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/txtDeviceName"
+        android:id="@+id/txtPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/card_margin"
+        android:text="@string/wrong_password"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:visibility="gone"/>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/txtDeviceName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btnPassword"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/card_margin"
+            android:layout_marginStart="@dimen/card_margin"
+            android:text="@string/password"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
 </br.com.carlosrafaelgn.iotcontroller.ui.DeviceContainer>

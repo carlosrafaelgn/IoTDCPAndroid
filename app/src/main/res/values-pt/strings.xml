@@ -35,4 +35,6 @@
     <string name="off">Off</string>
     <string name="onoff">On / Off</string>
     <string name="change">Alterar</string>
+    <string name="password">Senha</string>
+    <string name="device_password">Senha do dispositivo</string>
 </resources>

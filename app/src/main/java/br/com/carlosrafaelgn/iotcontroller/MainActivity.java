@@ -31,11 +31,15 @@ package br.com.carlosrafaelgn.iotcontroller;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,7 +48,11 @@ import android.widget.LinearLayout;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.UUID;
 
+import br.com.carlosrafaelgn.iotcontroller.ui.DeviceContainer;
 import br.com.carlosrafaelgn.iotdcp.IoTClient;
 import br.com.carlosrafaelgn.iotdcp.IoTDevice;
 import br.com.carlosrafaelgn.iotdcp.IoTMessage;
@@ -52,13 +60,18 @@ import br.com.carlosrafaelgn.iotcontroller.ui.IoTUI;
 import br.com.carlosrafaelgn.iotcontroller.ui.BgProgressBar;
 import br.com.carlosrafaelgn.iotcontroller.ui.UI;
 
-public class MainActivity extends AppCompatActivity implements IoTClient.Observer {
+public class MainActivity extends AppCompatActivity implements IoTClient.Observer, IoTUI.PasswordClickListener {
+	private static final String StoredPasswordsPreferenceName = "StoredPasswords";
+
 	private IoTClient client;
 	private LinearLayout panelDevices;
 	private BgProgressBar progressBar;
 	private boolean alertVisible;
-	private HashMap<IoTDevice, View> viewsByDevice;
+	private HashMap<IoTDevice, DeviceContainer> viewsByDevice;
 	private ArrayList<String> pendingErrorAlerts;
+	private HashSet<IoTDevice> devicesAlreadyContacted;
+	private boolean storedPasswordsChanged;
+	private HashMap<UUID, String> storedPasswords;
 
 	private void updateProgressBar() {
 		if (client != null && progressBar != null)
@@ -114,8 +127,12 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			// nothing to be done
 			return;
 		case IoTMessage.ResponseUnknownClient:
-			// apparently, we need to perform a handshake (again)
+			// apparently, we need to perform a handshake (again?)
 			device.handshake();
+			if (devicesAlreadyContacted != null && devicesAlreadyContacted.add(device)) {
+				// do not show the message the first time we perform a handshake
+				return;
+			}
 			message = getString(R.string.unknown_client, device.name);
 			break;
 		default:
@@ -137,8 +154,10 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 				messageId = R.string.eop_not_found;
 				break;
 			case IoTMessage.ResponseWrongPassword:
-				messageId = R.string.wrong_password;
-				break;
+				final DeviceContainer container = viewsByDevice.get(device);
+				if (container != null)
+					container.showWrongPasswordMessage(true);
+				return;
 			case IoTMessage.ResponsePasswordReadOnly:
 				messageId = R.string.password_read_only;
 				break;
@@ -192,6 +211,13 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 
 		viewsByDevice = new HashMap<>(16);
 		pendingErrorAlerts = new ArrayList<>(16);
+		devicesAlreadyContacted = new HashSet<>(16);
+		storedPasswordsChanged = false;
+		storedPasswords = new HashMap<>(16);
+
+		// load all stored passwords
+		for (Map.Entry<String, ?> entry : getSharedPreferences(StoredPasswordsPreferenceName, 0).getAll().entrySet())
+			storedPasswords.put(UUID.fromString(entry.getKey()), entry.getValue().toString());
 
 		try {
 			client = new IoTClient(getApplication());
@@ -206,13 +232,23 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+		if (storedPasswordsChanged && storedPasswords != null) {
+			storedPasswordsChanged = false;
+			final SharedPreferences sharedPreferences = getSharedPreferences(StoredPasswordsPreferenceName, 0);
+			final SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.clear();
+			for (Map.Entry<UUID, String> entry : storedPasswords.entrySet())
+				editor.putString(entry.getKey().toString(), entry.getValue());
+			editor.apply();
+			storedPasswords.clear();
+			storedPasswords = null;
+		}
 		panelDevices = null;
 		progressBar = null;
-		pendingErrorAlerts = null;
 		if (viewsByDevice != null) {
 			for (IoTDevice device : viewsByDevice.keySet())
 				device.goodBye();
+			viewsByDevice.clear();
 			viewsByDevice = null;
 			try {
 				Thread.sleep(100);
@@ -221,10 +257,19 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 				// (I know this is not a warranty...)
 			}
 		}
+		if (pendingErrorAlerts != null) {
+			pendingErrorAlerts.clear();
+			pendingErrorAlerts = null;
+		}
+		if (devicesAlreadyContacted != null) {
+			devicesAlreadyContacted.clear();
+			devicesAlreadyContacted = null;
+		}
 		if (client != null) {
 			client.destroy();
 			client = null;
 		}
+		super.onDestroy();
 		System.exit(0);
 	}
 
@@ -272,9 +317,12 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			updateProgressBar();
 			return;
 		}
-		final View view = IoTUI.createViewForDevice(this, panelDevices, device);
-		if (view != null) {
-			viewsByDevice.put(device, view);
+		final DeviceContainer deviceContainer = IoTUI.createViewForDevice(this, panelDevices, device, this);
+		if (deviceContainer != null) {
+			final String storedPassword = storedPasswords.get(device.uuid);
+			if (storedPassword != null)
+				device.setLocalPassword(storedPassword);
+			viewsByDevice.put(device, deviceContainer);
 			device.handshake();
 			updateProgressBar();
 		}
@@ -285,10 +333,13 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 		if (client != this.client)
 			return;
 		updateProgressBar();
-		if (responseCode != IoTMessage.ResponseOK)
+		if (responseCode != IoTMessage.ResponseOK) {
 			handleResponse(device, responseCode);
-		else
+		} else {
+			storedPasswordsChanged = true;
+			storedPasswords.put(device.uuid, password);
 			device.setLocalPassword(password);
+		}
 	}
 
 	@Override
@@ -299,6 +350,9 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			updateProgressBar();
 			handleResponse(device, responseCode);
 		} else {
+			final DeviceContainer container = viewsByDevice.get(device);
+			if (container != null)
+				container.showWrongPasswordMessage(false);
 			device.updateAllProperties();
 		}
 	}
@@ -358,5 +412,34 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 		final View view = viewsByDevice.get(device);
 		if (view != null)
 			IoTUI.updateViewOnPropertyChange(view, device, responseCode, interfaceIndex, propertyIndex);
+	}
+
+	@Override
+	public void onPasswordClick(final DeviceContainer container) {
+		final IoTDevice device = container.getDevice();
+		if (device == null || device.client != client)
+			return;
+
+		UI.prepareDialogAndShow(UI.createDialogBuilder(this)
+			.setTitle(R.string.password)
+			.setView(R.layout.password_input)
+			.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					final AppCompatEditText txtPassword = (AppCompatEditText)((AlertDialog)dialog).findViewById(R.id.txtPassword);
+					if (txtPassword == null)
+						return;
+					final Editable password = txtPassword.getText();
+					final String passwordStr = (password == null ? "" : password.toString());
+					container.showWrongPasswordMessage(false);
+					storedPasswordsChanged = true;
+					storedPasswords.put(device.uuid, passwordStr);
+					device.setLocalPassword(passwordStr);
+					device.handshake();
+					updateProgressBar();
+				}
+			})
+			.setNegativeButton(R.string.cancel, null)
+			.create());
 	}
 }

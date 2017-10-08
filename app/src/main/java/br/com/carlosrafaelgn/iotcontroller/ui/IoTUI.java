@@ -56,7 +56,11 @@ import br.com.carlosrafaelgn.iotdcp.IoTMessage;
 import br.com.carlosrafaelgn.iotdcp.IoTProperty;
 
 public final class IoTUI {
-	public static View createViewForDevice(Activity activity, ViewGroup parent, IoTDevice device) {
+	public interface PasswordClickListener {
+		void onPasswordClick(DeviceContainer container);
+	}
+
+	public static DeviceContainer createViewForDevice(Activity activity, ViewGroup parent, IoTDevice device, PasswordClickListener listener) {
 		final LayoutInflater layoutInflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		final CardView cardView = new CardView(activity);
@@ -64,7 +68,7 @@ public final class IoTUI {
 		layoutInflater.inflate(R.layout.device_container, cardView, true);
 		final DeviceContainer container = (DeviceContainer)cardView.getChildAt(0);
 		((AppCompatTextView)container.findViewById(R.id.txtDeviceName)).setText(device.name);
-		container.setDevice(device);
+		container.initialize(device, listener);
 
 		for (int i = 0; i < device.ioTInterfaceCount(); i++)
 			createViewForInterface(activity, layoutInflater, container, device.ioTInterface(i));
@@ -73,7 +77,7 @@ public final class IoTUI {
 		params.bottomMargin = (int)activity.getResources().getDimension(R.dimen.card_margin);
 		parent.addView(cardView, params);
 
-		return cardView;
+		return container;
 	}
 
 	private static void createViewForInterface(Activity activity, LayoutInflater layoutInflater, DeviceContainer container, IoTInterface ioTInterface) {
