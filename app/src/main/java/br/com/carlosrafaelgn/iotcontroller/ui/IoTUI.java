@@ -55,6 +55,7 @@ import br.com.carlosrafaelgn.iotdcp.IoTInterfaceOpenCloseStop;
 import br.com.carlosrafaelgn.iotdcp.IoTMessage;
 import br.com.carlosrafaelgn.iotdcp.IoTProperty;
 
+@SuppressWarnings({"unused"})
 public final class IoTUI {
 	public interface PasswordClickListener {
 		void onPasswordClick(DeviceContainer container);
@@ -125,17 +126,17 @@ public final class IoTUI {
 			}
 		};
 
-		AppCompatButton btn = ((AppCompatButton)parent.findViewById(R.id.btnOn));
+		AppCompatButton btn = parent.findViewById(R.id.btnOn);
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOn ? View.GONE : View.VISIBLE);
-		btn = ((AppCompatButton)parent.findViewById(R.id.btnOnOn));
+		btn = parent.findViewById(R.id.btnOnOn);
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOn ? View.VISIBLE : View.GONE);
 
-		btn = ((AppCompatButton)parent.findViewById(R.id.btnOff));
+		btn = parent.findViewById(R.id.btnOff);
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOff ? View.GONE : View.VISIBLE);
-		btn = ((AppCompatButton)parent.findViewById(R.id.btnOffOff));
+		btn = parent.findViewById(R.id.btnOffOff);
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOff ? View.VISIBLE : View.GONE);
 
@@ -158,11 +159,11 @@ public final class IoTUI {
 			}
 		};
 
-		AppCompatButton btn = ((AppCompatButton)parent.findViewById(R.id.btnOnOffOff));
+		AppCompatButton btn = parent.findViewById(R.id.btnOnOffOff);
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOn ? View.GONE : View.VISIBLE);
 
-		btn = ((AppCompatButton)parent.findViewById(R.id.btnOnOffOn));
+		btn = parent.findViewById(R.id.btnOnOffOn);
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOn ? View.VISIBLE : View.GONE);
 
@@ -206,7 +207,7 @@ public final class IoTUI {
 		final RelativeLayout panel = (RelativeLayout)parent.getChildAt(parent.getChildCount() - 1);
 		((AppCompatTextView)panel.findViewById(R.id.txtTitleColor)).setText(property.name);
 
-		final AppCompatButton btn = ((AppCompatButton)panel.findViewById(R.id.btnChange));
+		final AppCompatButton btn = panel.findViewById(R.id.btnChange);
 		if (property.mode == IoTProperty.ModeReadOnly) {
 			final ViewGroup.LayoutParams params = btn.getLayoutParams();
 			params.width = 0;
@@ -234,7 +235,7 @@ public final class IoTUI {
 		final RelativeLayout panel = (RelativeLayout)parent.getChildAt(parent.getChildCount() - 1);
 		((AppCompatTextView)panel.findViewById(R.id.txtTitleEnum)).setText(property.name);
 
-		final AppCompatSpinner spinner = ((AppCompatSpinner)panel.findViewById(R.id.spinnerEnum));
+		final AppCompatSpinner spinner = panel.findViewById(R.id.spinnerEnum);
 		ArrayAdapter<IoTProperty.Enum> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, property.getEnums());
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
@@ -394,12 +395,12 @@ public final class IoTUI {
 	private static void updateViewCommon(View parent, IoTProperty property) {
 		switch (property.unitNum) {
 		case IoTProperty.UnitRGB:
-			final AppCompatTextView txtColor = (AppCompatTextView)parent.findViewById(R.id.txtColor);
+			final AppCompatTextView txtColor = parent.findViewById(R.id.txtColor);
 			if (txtColor != null) txtColor.setBackgroundColor(property.getValueRGB());
 			break;
 
 		case IoTProperty.UnitEnum:
-			final AppCompatSpinner spinner = (AppCompatSpinner)parent.findViewById(R.id.spinnerEnum);
+			final AppCompatSpinner spinner = parent.findViewById(R.id.spinnerEnum);
 			if (spinner != null) spinner.setSelection(property.getEnums().indexOf(property.getValueEnum()));
 			break;
 

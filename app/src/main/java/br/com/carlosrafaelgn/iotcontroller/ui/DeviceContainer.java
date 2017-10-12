@@ -61,10 +61,10 @@ public class DeviceContainer extends LinearLayout {
 		if (!device.isPasswordProtected())
 			return;
 
-		txtPassword = (AppCompatTextView)findViewById(R.id.txtPassword);
+		txtPassword = findViewById(R.id.txtPassword);
 
-		final AppCompatButton btnPassword = (AppCompatButton)findViewById(R.id.btnPassword);
-		btnPassword.setVisibility(View.VISIBLE);
+		final AppCompatButton btnPassword = findViewById(R.id.btnPassword);
+		btnPassword.setVisibility(VISIBLE);
 		btnPassword.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -76,7 +76,11 @@ public class DeviceContainer extends LinearLayout {
 
 	public void showWrongPasswordMessage(boolean show) {
 		if (txtPassword != null)
-			txtPassword.setVisibility(show ? View.VISIBLE : View.GONE);
+			txtPassword.setVisibility(show ? VISIBLE : GONE);
+	}
+
+	public boolean isWrongPassword() {
+		return (txtPassword != null && txtPassword.getVisibility() == VISIBLE);
 	}
 
 	public IoTDevice getDevice() {

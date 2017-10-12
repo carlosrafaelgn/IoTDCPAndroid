@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 		if (client == null || device == null)
 			return;
 		final String message;
+		final DeviceContainer container;
 		switch (responseCode) {
 		case IoTMessage.ResponseTimeout:
 			message = getString(R.string.timeout, device.name);
@@ -131,6 +132,11 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			device.handshake();
 			if (devicesAlreadyContacted != null && devicesAlreadyContacted.add(device)) {
 				// do not show the message the first time we perform a handshake
+				return;
+			}
+			container = viewsByDevice.get(device);
+			if (container != null && container.isWrongPassword()) {
+				// the password is still invalid
 				return;
 			}
 			message = getString(R.string.unknown_client, device.name);
@@ -154,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 				messageId = R.string.eop_not_found;
 				break;
 			case IoTMessage.ResponseWrongPassword:
-				final DeviceContainer container = viewsByDevice.get(device);
+				container = viewsByDevice.get(device);
 				if (container != null)
 					container.showWrongPasswordMessage(true);
 				return;
@@ -203,11 +209,11 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 
 		UI.initialize(this);
 
-		final Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+		final Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		panelDevices = (LinearLayout)findViewById(R.id.panelDevices);
-		progressBar = (BgProgressBar)findViewById(R.id.progressBar);
+		panelDevices = findViewById(R.id.panelDevices);
+		progressBar = findViewById(R.id.progressBar);
 
 		viewsByDevice = new HashMap<>(16);
 		pendingErrorAlerts = new ArrayList<>(16);
@@ -426,7 +432,7 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					final AppCompatEditText txtPassword = (AppCompatEditText)((AlertDialog)dialog).findViewById(R.id.txtPassword);
+					final AppCompatEditText txtPassword = ((AlertDialog)dialog).findViewById(R.id.txtPassword);
 					if (txtPassword == null)
 						return;
 					final Editable password = txtPassword.getText();
