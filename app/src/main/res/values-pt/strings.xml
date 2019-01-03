@@ -22,7 +22,9 @@
     <string name="invalid_payload">O conteúdo da mensagem era inválido</string>
     <string name="eop_not_found">Mensagem terminada incorretamente</string>
     <string name="wrong_password">Senha inválida</string>
+    <string name="name_read_only">O nome é fixo e não pode ser alterado</string>
     <string name="password_read_only">A senha é fixa e não pode ser alterada</string>
+    <string name="cannot_change_name_now">Não é possível alterar o nome nesse momento</string>
     <string name="cannot_change_password_now">Não é possível alterar a senha nesse momento</string>
     <string name="invalid_interface">Interface inválida</string>
     <string name="invalid_interface_command">Comando inválido</string>

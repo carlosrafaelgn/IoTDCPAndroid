@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 	private boolean isConnected() {
 		try {
 			final ConnectivityManager mngr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+			if (mngr == null)
+				return true;
 			final NetworkInfo info = mngr.getActiveNetworkInfo();
 			return (info != null && info.isConnected());
 		} catch (Throwable ex) {
@@ -121,9 +123,6 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 		final String message;
 		final DeviceContainer container;
 		switch (responseCode) {
-		case IoTMessage.ResponseTimeout:
-			message = getString(R.string.timeout, device.name);
-			break;
 		case IoTMessage.ResponseOK:
 			// nothing to be done
 			return;
@@ -164,8 +163,14 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 				if (container != null)
 					container.showWrongPasswordMessage(true);
 				return;
+			case IoTMessage.ResponseNameReadOnly:
+				messageId = R.string.name_read_only;
+				break;
 			case IoTMessage.ResponsePasswordReadOnly:
 				messageId = R.string.password_read_only;
+				break;
+			case IoTMessage.ResponseCannotChangeNameNow:
+				messageId = R.string.cannot_change_name_now;
 				break;
 			case IoTMessage.ResponseCannotChangePasswordNow:
 				messageId = R.string.cannot_change_password_now;
@@ -226,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 			storedPasswords.put(UUID.fromString(entry.getKey()), entry.getValue().toString());
 
 		try {
-			client = new IoTClient(getApplication());
+			client = new IoTClient(getApplication(), 1, 60000, 512 * 1024);
 			client.setObserver(this);
 			client.scanDevices();
 		} catch (Throwable ex) {
@@ -252,8 +257,10 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 		panelDevices = null;
 		progressBar = null;
 		if (viewsByDevice != null) {
-			for (IoTDevice device : viewsByDevice.keySet())
+			for (IoTDevice device : viewsByDevice.keySet()) {
+				device.userTag = null;
 				device.goodBye();
+			}
 			viewsByDevice.clear();
 			viewsByDevice = null;
 			try {
@@ -301,7 +308,15 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 	}
 
 	@Override
-	public void onException(IoTClient client, Throwable ex) {
+	public void onTimeout(IoTClient client, IoTDevice device, int messageType, int userArg) {
+		if (client != this.client)
+			return;
+		updateProgressBar();
+		showErrorAlert(getString(R.string.timeout, device.name));
+	}
+
+	@Override
+	public void onException(IoTClient client, Throwable ex, int messageType, int userArg) {
 		if (client != this.client)
 			return;
 		updateProgressBar();
@@ -312,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 	}
 
 	@Override
-	public void onMessageSent(IoTClient client, IoTDevice device, int message) {
+	public void onMessageSent(IoTClient client, IoTDevice device, int messageType, int userArg) {
 		updateProgressBar();
 	}
 
@@ -335,7 +350,21 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 	}
 
 	@Override
-	public void onChangePassword(IoTClient client, IoTDevice device, int responseCode, String password) {
+	public void onChangeName(IoTClient client, IoTDevice device, int responseCode, String name, int userArg) {
+		if (client != this.client)
+			return;
+		updateProgressBar();
+		if (responseCode != IoTMessage.ResponseOK) {
+			handleResponse(device, responseCode);
+		} else {
+			final DeviceContainer container = viewsByDevice.get(device);
+			if (container != null)
+				container.updateDeviceName();
+		}
+	}
+
+	@Override
+	public void onChangePassword(IoTClient client, IoTDevice device, int responseCode, String password, int userArg) {
 		if (client != this.client)
 			return;
 		updateProgressBar();
@@ -349,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 	}
 
 	@Override
-	public void onHandshake(IoTClient client, IoTDevice device, int responseCode) {
+	public void onHandshake(IoTClient client, IoTDevice device, int responseCode, int userArg) {
 		if (client != this.client)
 			return;
 		if (responseCode != IoTMessage.ResponseOK) {
@@ -364,60 +393,45 @@ public class MainActivity extends AppCompatActivity implements IoTClient.Observe
 	}
 
 	@Override
-	public void onPing(IoTClient client, IoTDevice device, int responseCode) {
+	public void onPing(IoTClient client, IoTDevice device, int responseCode, int userArg) {
 		handleResponse(device, responseCode);
 	}
 
 	@Override
-	public void onReset(IoTClient client, IoTDevice device, int responseCode) {
+	public void onReset(IoTClient client, IoTDevice device, int responseCode, int userArg) {
 		handleResponse(device, responseCode);
 	}
 
 	@Override
-	public void onGoodBye(IoTClient client, IoTDevice device, int responseCode) {
+	public void onGoodBye(IoTClient client, IoTDevice device, int responseCode, int userArg) {
 		handleResponse(device, responseCode);
 	}
 
 	@Override
-	public void onExecute(IoTClient client, IoTDevice device, int responseCode, int interfaceIndex, int command) {
+	public void onExecute(IoTClient client, IoTDevice device, int responseCode, int interfaceIndex, int command, int userArg) {
 		if (client != this.client)
 			return;
 		updateProgressBar();
-		if (responseCode != IoTMessage.ResponseOK) {
+		if (responseCode != IoTMessage.ResponseOK)
 			handleResponse(device, responseCode);
-			return;
-		}
-		final View view = viewsByDevice.get(device);
-		if (view != null)
-			IoTUI.updateViewOnExecute(view, device, responseCode, interfaceIndex, command);
 	}
 
 	@Override
-	public void onGetProperty(IoTClient client, IoTDevice device, int responseCode, int interfaceIndex, int propertyIndex) {
+	public void onGetProperty(IoTClient client, IoTDevice device, int responseCode, int userArg) {
 		if (client != this.client)
 			return;
 		updateProgressBar();
-		if (responseCode != IoTMessage.ResponseOK) {
+		if (responseCode != IoTMessage.ResponseOK)
 			handleResponse(device, responseCode);
-			return;
-		}
-		final View view = viewsByDevice.get(device);
-		if (view != null)
-			IoTUI.updateViewOnPropertyChange(view, device, responseCode, interfaceIndex, propertyIndex);
 	}
 
 	@Override
-	public void onSetProperty(IoTClient client, IoTDevice device, int responseCode, int interfaceIndex, int propertyIndex) {
+	public void onSetProperty(IoTClient client, IoTDevice device, int responseCode, int userArg) {
 		if (client != this.client)
 			return;
 		updateProgressBar();
-		if (responseCode != IoTMessage.ResponseOK) {
+		if (responseCode != IoTMessage.ResponseOK)
 			handleResponse(device, responseCode);
-			return;
-		}
-		final View view = viewsByDevice.get(device);
-		if (view != null)
-			IoTUI.updateViewOnPropertyChange(view, device, responseCode, interfaceIndex, propertyIndex);
 	}
 
 	@Override

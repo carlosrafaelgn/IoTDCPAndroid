@@ -52,14 +52,15 @@ import br.com.carlosrafaelgn.iotdcp.IoTInterfaceOnOff;
 import br.com.carlosrafaelgn.iotdcp.IoTInterfaceOnOffSimple;
 import br.com.carlosrafaelgn.iotdcp.IoTInterfaceOpenClose;
 import br.com.carlosrafaelgn.iotdcp.IoTInterfaceOpenCloseStop;
-import br.com.carlosrafaelgn.iotdcp.IoTMessage;
 import br.com.carlosrafaelgn.iotdcp.IoTProperty;
 
 @SuppressWarnings({"unused"})
-public final class IoTUI {
+public final class IoTUI implements IoTProperty.Observer {
 	public interface PasswordClickListener {
 		void onPasswordClick(DeviceContainer container);
 	}
+
+	private static final IoTUI ui = new IoTUI();
 
 	public static DeviceContainer createViewForDevice(Activity activity, ViewGroup parent, IoTDevice device, PasswordClickListener listener) {
 		final LayoutInflater layoutInflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -70,6 +71,8 @@ public final class IoTUI {
 		final DeviceContainer container = (DeviceContainer)cardView.getChildAt(0);
 		((AppCompatTextView)container.findViewById(R.id.txtDeviceName)).setText(device.name);
 		container.initialize(device, listener);
+
+		device.userTag = container;
 
 		for (int i = 0; i < device.ioTInterfaceCount(); i++)
 			createViewForInterface(activity, layoutInflater, container, device.ioTInterface(i));
@@ -140,6 +143,8 @@ public final class IoTUI {
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOff ? View.VISIBLE : View.GONE);
 
+		onOff.state.setObserver(ui);
+
 		createViewForProperties(activity, layoutInflater, parent, ioTInterface, 1);
 	}
 
@@ -167,6 +172,8 @@ public final class IoTUI {
 		btn.setOnClickListener(clickListener);
 		btn.setVisibility(state == IoTInterfaceOnOff.StateOn ? View.VISIBLE : View.GONE);
 
+		onOffSimple.state.setObserver(ui);
+
 		createViewForProperties(activity, layoutInflater, parent, ioTInterface, 1);
 	}
 
@@ -177,11 +184,13 @@ public final class IoTUI {
 			final IoTProperty property = ioTInterface.property(firstProperty);
 			switch (property.unitNum) {
 			case IoTProperty.UnitRGB:
+			case IoTProperty.UnitRGBA:
 				if (needsDivider)
 					createDivider(layoutInflater, parent);
 				else
 					needsDivider = true;
 				createViewForRGBProperty(activity, layoutInflater, parent, property);
+				property.setObserver(ui);
 				break;
 
 			case IoTProperty.UnitEnum:
@@ -190,6 +199,7 @@ public final class IoTUI {
 				else
 					needsDivider = true;
 				createViewForEnumProperty(activity, layoutInflater, parent, property);
+				property.setObserver(ui);
 				break;
 
 			// TODO: implement other property types
@@ -218,10 +228,10 @@ public final class IoTUI {
 			btn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					ColorPickerView.showDialog(activity, property.getValueRGB(), null, false, new ColorPickerView.OnColorPickerViewListener() {
+					ColorPickerView.showDialog(activity, property.getValueRGBA(), null, false, new ColorPickerView.OnColorPickerViewListener() {
 						@Override
 						public void onColorPicked(ColorPickerView colorPickerView, View parentView, int color) {
-							property.setValueRGB(color);
+							property.setValueRGBA(color);
 						}
 					});
 				}
@@ -270,94 +280,6 @@ public final class IoTUI {
 		}
 	}
 
-	public static void updateViewOnExecute(View view, IoTDevice device, int responseCode, int interfaceIndex, int command) {
-		final IoTInterface ioTInterface;
-
-		if (view == null ||
-			responseCode != IoTMessage.ResponseOK ||
-			interfaceIndex < 0 ||
-			interfaceIndex >= device.ioTInterfaceCount() ||
-			(ioTInterface = device.ioTInterface(interfaceIndex)) == null)
-			return;
-
-		switch (ioTInterface.type) {
-		// IoTInterface.TypeSensor has no predefined commands
-		//case IoTInterface.TypeSensor:
-		//	break;
-		case IoTInterface.TypeOnOff:
-			switch (command) {
-			case IoTInterfaceOnOff.CommandOff:
-			case IoTInterfaceOnOff.CommandOn:
-				updateViewOnOff(view, ((IoTInterfaceOnOff)ioTInterface).state);
-			}
-			break;
-		case IoTInterface.TypeOnOffSimple:
-			switch (command) {
-			case IoTInterfaceOnOffSimple.CommandOnOff:
-				updateViewOnOffSimple(view, ((IoTInterfaceOnOffSimple)ioTInterface).state);
-			}
-			break;
-		case IoTInterface.TypeOpenClose:
-			switch (command) {
-			case IoTInterfaceOpenClose.CommandClose:
-			case IoTInterfaceOpenClose.CommandOpen:
-				updateViewOpenClose(view, ((IoTInterfaceOpenClose)ioTInterface).state);
-			}
-			break;
-		case IoTInterface.TypeOpenCloseStop:
-			switch (command) {
-			case IoTInterfaceOpenCloseStop.CommandClose:
-			case IoTInterfaceOpenCloseStop.CommandOpen:
-			case IoTInterfaceOpenCloseStop.CommandStop:
-				updateViewOpenCloseStop(view, ((IoTInterfaceOpenCloseStop)ioTInterface).state);
-			}
-			break;
-		}
-	}
-
-	public static void updateViewOnPropertyChange(View view, IoTDevice device, int responseCode, int interfaceIndex, int propertyIndex) {
-		final IoTInterface ioTInterface;
-
-		if (view == null ||
-			responseCode != IoTMessage.ResponseOK ||
-			interfaceIndex < 0 ||
-			interfaceIndex >= device.ioTInterfaceCount() ||
-			(ioTInterface = device.ioTInterface(interfaceIndex)) == null ||
-			propertyIndex < 0 ||
-			propertyIndex >= ioTInterface.propertyCount())
-			return;
-
-		switch (ioTInterface.type) {
-		case IoTInterface.TypeSensor:
-			updateViewCommon(view, ioTInterface.property(propertyIndex));
-			break;
-		case IoTInterface.TypeOnOff:
-			if (propertyIndex == IoTInterfaceOnOff.PropertyState)
-				updateViewOnOff(view, ioTInterface.property(propertyIndex));
-			else
-				updateViewCommon(view, ioTInterface.property(propertyIndex));
-			break;
-		case IoTInterface.TypeOnOffSimple:
-			if (propertyIndex == IoTInterfaceOnOffSimple.PropertyState)
-				updateViewOnOffSimple(view, ioTInterface.property(propertyIndex));
-			else
-				updateViewCommon(view, ioTInterface.property(propertyIndex));
-			break;
-		case IoTInterface.TypeOpenClose:
-			if (propertyIndex == IoTInterfaceOpenClose.PropertyState)
-				updateViewOpenClose(view, ioTInterface.property(propertyIndex));
-			else
-				updateViewCommon(view, ioTInterface.property(propertyIndex));
-			break;
-		case IoTInterface.TypeOpenCloseStop:
-			if (propertyIndex == IoTInterfaceOpenCloseStop.PropertyState)
-				updateViewOpenCloseStop(view, ioTInterface.property(propertyIndex));
-			else
-				updateViewCommon(view, ioTInterface.property(propertyIndex));
-			break;
-		}
-	}
-
 	private static void updateViewOnOff(View parent, IoTProperty property) {
 		final int state = property.getValueByte();
 
@@ -395,8 +317,9 @@ public final class IoTUI {
 	private static void updateViewCommon(View parent, IoTProperty property) {
 		switch (property.unitNum) {
 		case IoTProperty.UnitRGB:
+		case IoTProperty.UnitRGBA:
 			final AppCompatTextView txtColor = parent.findViewById(R.id.txtColor);
-			if (txtColor != null) txtColor.setBackgroundColor(property.getValueRGB());
+			if (txtColor != null) txtColor.setBackgroundColor(property.getValueRGBA());
 			break;
 
 		case IoTProperty.UnitEnum:
@@ -405,6 +328,46 @@ public final class IoTUI {
 			break;
 
 		// TODO: implement other property types
+		}
+	}
+
+	@Override
+	public void onPropertyChange(IoTInterface ioTInterface, IoTProperty property, int userArg) {
+		final IoTDevice device = ioTInterface.device;
+
+		if (!(device.userTag instanceof DeviceContainer))
+			return;
+
+		final DeviceContainer container = (DeviceContainer)device.userTag;
+
+		switch (ioTInterface.type) {
+		case IoTInterface.TypeSensor:
+			updateViewCommon(container, property);
+			break;
+		case IoTInterface.TypeOnOff:
+			if (property.index == IoTInterfaceOnOff.PropertyState)
+				updateViewOnOff(container, property);
+			else
+				updateViewCommon(container, property);
+			break;
+		case IoTInterface.TypeOnOffSimple:
+			if (property.index == IoTInterfaceOnOffSimple.PropertyState)
+				updateViewOnOffSimple(container, property);
+			else
+				updateViewCommon(container, property);
+			break;
+		case IoTInterface.TypeOpenClose:
+			if (property.index == IoTInterfaceOpenClose.PropertyState)
+				updateViewOpenClose(container, property);
+			else
+				updateViewCommon(container, property);
+			break;
+		case IoTInterface.TypeOpenCloseStop:
+			if (property.index == IoTInterfaceOpenCloseStop.PropertyState)
+				updateViewOpenCloseStop(container, property);
+			else
+				updateViewCommon(container, property);
+			break;
 		}
 	}
 }

@@ -22,7 +22,9 @@
     <string name="invalid_payload">The message\'s content was invalid</string>
     <string name="eop_not_found">The message was not properly terminated</string>
     <string name="wrong_password">Wrong password</string>
+    <string name="name_read_only">The name is fixed and cannot be changed</string>
     <string name="password_read_only">The password is fixed and cannot be changed</string>
+    <string name="cannot_change_name_now">It is not possible to change the name right now</string>
     <string name="cannot_change_password_now">It is not possible to change the password right now</string>
     <string name="invalid_interface">Invalid interface</string>
     <string name="invalid_interface_command">Invalid command</string>

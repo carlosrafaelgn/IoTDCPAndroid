@@ -12,4 +12,5 @@
     <color name="colorBgText">#000000</color>
     <color name="colorBgTextMedium">#505050</color>
     <color name="colorBgTextSecondary">#3F51B5</color>
+    <color name="ic_launcher_background">#3F51B5</color>
 </resources>

@@ -74,6 +74,12 @@ public class DeviceContainer extends LinearLayout {
 		});
 	}
 
+	public void updateDeviceName() {
+		final AppCompatTextView txtDeviceName = findViewById(R.id.txtDeviceName);
+		if (txtDeviceName != null)
+			txtDeviceName.setText(device.name);
+	}
+
 	public void showWrongPasswordMessage(boolean show) {
 		if (txtPassword != null)
 			txtPassword.setVisibility(show ? VISIBLE : GONE);
